@@ -1,32 +1,22 @@
 package nl.dcn.kotlinworkshop
 
-import com.fasterxml.jackson.module.kotlin.jacksonMapperBuilder
+import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.h2.server.Service
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.Bean
+import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest
-class KotlinWorkshopApplicationTests() {
 
-	@Test
-	fun contextLoads() {
-	}
-
-	@Test
-	fun itWorks() {
-
-	}
-}
-
-class DataTest() {
+class DataUnitTest() {
 	@Test
 	fun aBasicUnitTest() {
 		val x = Message(null, "dit is de text")
@@ -35,7 +25,7 @@ class DataTest() {
 	}
 }
 
-class ServiceTest() {
+class ServiceUnitTest() {
 
 	val jdbcTemplate: JdbcTemplate = mockk();
 	val messageService: MessageService = MessageService(jdbcTemplate);
@@ -50,9 +40,20 @@ class ServiceTest() {
 
 }
 
+@WebMvcTest
+class ControllerUnitTest(@Autowired val mockMvc: MockMvc) {
+	@MockkBean
+	lateinit var messageService: MessageService;
+
+	@Test
+	fun itWorks() {
+		every { messageService.findMessages() } returns emptyList();
+		mockMvc.perform(get("/")).andExpect(status().isOk)
+	}
+}
+
 @DataJpaTest
 class ServiceIntegrationTest() {
-
 	@Autowired
 	lateinit var jdbcTemplate: JdbcTemplate
 
@@ -63,5 +64,26 @@ class ServiceIntegrationTest() {
 		messageService.save(message);
 		val resuts = messageService.findMessages();
 		assert( resuts.size == 1)
+	}
+}
+
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class KotlinWorkshopApplicationTests() {
+
+	@Autowired
+	lateinit var restTemplate: TestRestTemplate
+
+	@Test
+	fun contextLoads() {
+	}
+
+	@Test
+	fun itWorks() {
+		val message = Message("1", "Henk de Paashaas")
+		val postResult = restTemplate.postForEntity("/", message, Object::class.java)
+		val result = restTemplate.getForEntity("/", Array<Message>::class.java);
+		assert(result.hasBody())
+		assert(result.body!!.get(0).text == "Henk de Paashaas")
 	}
 }
