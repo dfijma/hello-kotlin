@@ -2,12 +2,12 @@
 
 Om up-and-running te komen heb ik de volgende "getting started" gevolgd:
 
-* [https://kotlinlang.org/docs/jvm-get-started-spring-boot.html](getting started)
+* [getting started](https://kotlinlang.org/docs/jvm-get-started-spring-boot.html)
 
 De "gettings started" gaat niet in op hoe een unit/integratie-test toe te voegen (hoe krijg je een bean of een gemockte versie daarvan in een test?). 
 Ik heb deze tips gevonden, maar ik heb dat nog niet helemaal goed doorgelezen:
 
-* [https://www.baeldung.com/kotlin/spring-boot-testing](testing)
+* [testing](https://www.baeldung.com/kotlin/spring-boot-testing)
 
 ### Reference Documentation
 For further reference, please consider the following sections:
