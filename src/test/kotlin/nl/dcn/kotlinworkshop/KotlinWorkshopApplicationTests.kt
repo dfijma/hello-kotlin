@@ -27,15 +27,18 @@ class DataUnitTest() {
 
 class ServiceUnitTest() {
 
-	val jdbcTemplate: JdbcTemplate = mockk();
-	val messageService: MessageService = MessageService(jdbcTemplate);
+	// val jdbcTemplate: JdbcTemplate = mockk();
+	val messageRepository: MessageRepository = mockk()
+	val messageService: MessageService = MessageService(messageRepository);
 
 	@Test
 	fun okItDoesNotTestShitButItWorksAgainstAMock() {
-		every { jdbcTemplate.update(any<String>(), "1", "2") } returns 1;
+		// every { jdbcTemplate.update(any<String>(), "1", "2") } returns 1;
+		every { messageRepository.save(any()) } returns Message("1", "2")
 		val message = Message("1", "2")
 		messageService.save(message)
-		verify { jdbcTemplate.update("insert into messages values ( ?, ? )", "1", "2") }
+		verify { messageRepository.save(Message("1" ,"2")) }
+		// verify { jdbcTemplate.update("insert into messages values ( ?, ? )", "1", "2") }
 	}
 
 }
@@ -52,15 +55,18 @@ class ControllerUnitTest(@Autowired val mockMvc: MockMvc) {
 	}
 }
 
-@DataJpaTest
+@SpringBootTest
 class ServiceIntegrationTest() {
 	@Autowired
 	lateinit var jdbcTemplate: JdbcTemplate
 
+	@Autowired
+	lateinit var messageRepository: MessageRepository;
+
 	@Test
 	fun againThisIntegrationTestDoesNotTestMuchButItRunsAgainstARealJbdcTemplate() {
 		val message = Message("1", "2")
-		val messageService = MessageService(jdbcTemplate)
+		val messageService = MessageService(messageRepository)
 		messageService.save(message);
 		val resuts = messageService.findMessages();
 		assert( resuts.size == 1)

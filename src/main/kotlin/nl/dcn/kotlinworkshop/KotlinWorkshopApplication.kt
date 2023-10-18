@@ -1,5 +1,7 @@
 package nl.dcn.kotlinworkshop
 
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.stereotype.Service
@@ -8,23 +10,28 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.data.repository.CrudRepository
+import java.util.*
 
 @SpringBootApplication
 class KotlinWorkshopApplication
 
-data class Message(val id: String?, val text: String)
+@Table("MESSAGES")
+data class Message(@Id var id: String?, val text: String)
 
+interface MessageRepository : CrudRepository<Message, String>
 
 @Service
-class MessageService(val db: JdbcTemplate) {
-	fun findMessages(): List<Message> = db.query("select * from messages") { response, _ ->
-		Message(response.getString("id"), response.getString("text"))
+class MessageService(val repository: MessageRepository) {
+	fun findMessages(): List<Message> = repository.findAll().toList();
+
+	fun save(message: Message) {
+		repository.save(message)
 	}
 
-	fun save(message: Message){
-		db.update("insert into messages values ( ?, ? )",
-			message.id, message.text)
-	}
+
+	fun <T : Any> Optional<out T>.toList(): List<T> =
+		if (isPresent) listOf(get()) else emptyList()
 }
 
 @RestController
