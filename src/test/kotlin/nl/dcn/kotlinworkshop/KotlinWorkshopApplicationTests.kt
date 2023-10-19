@@ -33,12 +33,10 @@ class ServiceUnitTest() {
 
 	@Test
 	fun okItDoesNotTestShitButItWorksAgainstAMock() {
-		// every { jdbcTemplate.update(any<String>(), "1", "2") } returns 1;
 		every { messageRepository.save(any()) } returns Message("1", "2")
-		val message = Message("1", "2")
+		val message = Message(null, "2")
 		messageService.save(message)
-		verify { messageRepository.save(Message("1" ,"2")) }
-		// verify { jdbcTemplate.update("insert into messages values ( ?, ? )", "1", "2") }
+		verify { messageRepository.save(Message(null ,"2")) }
 	}
 
 }
@@ -55,21 +53,35 @@ class ControllerUnitTest(@Autowired val mockMvc: MockMvc) {
 	}
 }
 
-@SpringBootTest
-class ServiceIntegrationTest() {
+@DataJpaTest
+class SomeIntegrationTestAgainstARealJdbcTemplate() {
 	@Autowired
 	lateinit var jdbcTemplate: JdbcTemplate
+
+	@Test
+	fun againThisIntegrationTestDoesNotTestMuchButItRunsAgainstARealJbdcTemplate() {
+
+		val results = jdbcTemplate.query("select * from messages") { response, _ ->
+			Message(response.getString("id"), response.getString("text"))
+		}
+		assert( results.size == 0)
+
+	}
+}
+
+@SpringBootTest
+class ServiceIntegrationTest() {
 
 	@Autowired
 	lateinit var messageRepository: MessageRepository;
 
 	@Test
 	fun againThisIntegrationTestDoesNotTestMuchButItRunsAgainstARealJbdcTemplate() {
-		val message = Message("1", "2")
+		val message = Message(null, "2")
 		val messageService = MessageService(messageRepository)
-		messageService.save(message);
-		val resuts = messageService.findMessages();
-		assert( resuts.size == 1)
+		messageService.save(message)
+		val results = messageService.findMessages()
+		assert( results.size == 1)
 	}
 }
 
@@ -86,7 +98,7 @@ class KotlinWorkshopApplicationTests() {
 
 	@Test
 	fun itWorks() {
-		val message = Message("1", "Henk de Paashaas")
+		val message = Message(null, "Henk de Paashaas")
 		val postResult = restTemplate.postForEntity("/", message, Object::class.java)
 		val result = restTemplate.getForEntity("/", Array<Message>::class.java);
 		assert(result.hasBody())
