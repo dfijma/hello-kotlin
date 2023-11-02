@@ -1,5 +1,7 @@
 package nl.dcn.kotlinworkshop
 
+import nl.dcn.kotlinworkshop.service.DataParser
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -23,6 +25,10 @@ interface MessageRepository : CrudRepository<Message, String>
 
 @Service
 class MessageService(val repository: MessageRepository) {
+
+	@Autowired
+	lateinit var dataParser: DataParser
+
 	fun findMessages(): List<Message> = repository.findAll().toList();
 
 	fun save(message: Message) {

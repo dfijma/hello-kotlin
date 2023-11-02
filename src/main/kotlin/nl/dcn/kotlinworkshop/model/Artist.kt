@@ -1,4 +1,14 @@
 package nl.dcn.kotlinworkshop.model
 
-data class Artist(val Id: Int, val Name: String) {
-}
+import com.google.gson.annotations.SerializedName
+import jakarta.persistence.*
+
+@Entity
+data class Artist(
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val identifier: Long? = null,
+    @SerializedName("Id")
+    val id: Int,
+    @SerializedName("Name")
+    val name: String
+)
